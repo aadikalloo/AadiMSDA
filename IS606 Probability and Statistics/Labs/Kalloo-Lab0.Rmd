@@ -1,0 +1,47 @@
+---
+title: "IS606 Lab 0"
+author: "Aadi Kalloo"
+date: "Due February 5, 2016"
+output: pdf_document
+---
+
+**Question 1:**
+```{r}
+source("http://www.openintro.org/stat/data/arbuthnot.R")
+source("http://www.openintro.org/stat/data/present.R")
+present$year
+dim(present)
+names(present)
+```
+
+**Question 2:**
+```{r}
+mean(present$boys)/mean(arbuthnot$boys)
+mean(present$girls)/mean(arbuthnot$girls)
+
+```
+
+The values in the *present* dataframe are on average 320x greater than the valuesi n the *arbuthnot* dataframe and, therefore, these are not on the same scale. 
+    
+                
+**Question 3:**     
+First make both plots with the same scale on Y axis to allow direct comparison between plots: 
+
+```{r}
+plot(x = arbuthnot$year, y = arbuthnot$boys/arbuthnot$girls, type = "l", ylim = c(1,1.20), xlab = "Year", ylab = "Boys/Girls") 
+title("Arbuthnot Boy/Girl Ratio")
+plot(x = present$year, y = present$boys/present$girls, type = "l", ylim=c(1,1.20), xlab = "Year", ylab = "Boys/Girls")
+title("Present Boy/Girl Ratio")
+
+
+```
+
+While there is much less variance in the USA in the birth ratio of boys to girls, it can be seen that that this ratio is stable around 1.05 and therefore boys are, in fact, born in greater proportion. 
+
+**Question 4:**
+```{r}
+present$year[which.max(present$boys + present$girls)]
+
+```
+
+Total births were highest in 1961.
