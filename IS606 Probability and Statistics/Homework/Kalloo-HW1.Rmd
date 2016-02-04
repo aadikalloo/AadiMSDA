@@ -1,0 +1,82 @@
+---
+title: "IS606 Homework 1"
+author: "Aadi Kalloo"
+date: "Due February 7, 2016"
+output: html_document
+---
+
+Intro to Data
+<br></br>
+
+<br>
+1.8  
+a. Each row of the matrix represents a case, or an individual participant in the survey.  
+b. There are 1691 participants included in the survey since the last row number is 1691.  
+c.  
+<table>
+  <tr><td>1. sex&emsp;</td><td>Categorical&emsp;</td><td>Not Ordinal</td></tr>
+  <tr><td>2. age  </td>             <td>Numerical &emsp;</td><td>Continuous*</td></tr>
+  <tr><td>3. marital  </td>         <td>Categorical &emsp;</td>  <td>Not Ordinal</td></tr>
+  <tr><td>4. grossIncome  </td>     <td>Categorical &emsp;</td>  <td>Ordinal</td></tr>
+  <tr><td>5. smoke  </td>           <td>Categorical &emsp;</td>  <td>Not Ordinal</td></tr>
+  <tr><td>6. amtWeekends</td>       <td>Numerical &emsp;</td><td>Continuous*</td></tr>
+  <tr><td>7. amtWeekdays&emsp;</td> <td>Numerical &emsp;</td><td>Continuous*</td></tr>
+</table>    
+*Continuous if only whole numbers are considered.   
+For example, ages 44.00--44.99 are all considered to be 44. One could argue these are discrete.    
+</br>
+
+<br>
+1.10  
+a) The population of interest are children 5-15 years of age. The sample is the group of 160 children chosen.    
+b) I don't think that a sample of 160 is large enough to generalize results to the overall population. Also, no statements are made here on the sampling methods chosen. It is possible that these results only apply to a specific biased sample and do not apply to the larger population. Furthermore, it is very possible that even a random sample from only one particular country or region with a country would produce results that only apply to that region; behavior can change based on a child's upbringing in different regions and changes in societal attitudes. Since this is a randomized experiment, some causal inferences can be made with regards to girls' ages and cheating instruction.  </br>
+
+<br>1.28  
+a. This is observational data and while an association can be seen, causal inferences cannot be made here. It is possible that more frequent smokers engaged in other unhealthy activities (poor diet, sleep habits, etc.), which may have had a more direct effect on dementia status. Further study is needed here.   
+b. This study more accurately shows increased risk of bullying in children who may have sleep disorders. The study shows more of an association than a causal relationship. Furthermore, there are other problems with this study such as lack of professional evaluation of behavioral problems, and lack of professional evaluation of (symptoms of) sleep disorders (polysomnogram).   
+</br>
+<p>1.36  
+a. This is a randomized (and controlled) experiment
+b. The treatment groups are those assigned to excercise. The control groups are those not assigned to exercise.  
+c. Yes, the blocking variable is age group.   
+d. The description mentions nothing of blinding. So no.   
+e. Since this is an experiment that is both randomized and controlled, it is likely that results can be generalized to the larger population. In this case, it would be only applicable to the adult population since no on under 18 years of age is included.   
+f. I would like to see more information about what qualifies as "exercise". More specific instructions should be given.   
+</p>   
+<br>
+<p>1.48   
+```{r, echo = FALSE}
+q148data <- c(57, 66, 69, 71, 72, 73, 74, 77, 78, 78, 79, 79, 81, 81, 82, 83, 83, 88, 89, 94);
+boxplot(q148data)
+title("Stats scores")
+
+```
+</p>
+</br>
+
+<br>1.50      
+a. A seemingly normal distribution. Matches (2)      
+b. A Uniform distribution. Matches (3)    
+c. Skewed right (positive). Matches (1)       
+</br>
+
+<br>1.56      
+a. Left skewed because significant number > $6M. Therefore, median would be the best approximation of "typical" and variability would be best described by IQR.   
+b. Seems like a symmetric distribution due to few houses outside of range. Mean and standard deviation would be best to use.    
+c. Right skewed since most do not drink and only few drink excessively. Therefore, median would be the best approximation of "typical" and variability would be best described by IQR.     
+d. Right skewed since only a few earn high salaries. Therefore, median would be the best approximation of "typical" and variability would be best described by IQR.       
+
+</br>
+
+
+<br>1.70        
+a. No. Given that treatment status has an effect on survival status, these variables are not independent.    
+b. They suggest that the treatment is quite effective given the larger proportion of surviving patients and the increase in median survival time.     
+c. Treatment: 0.65;  Control: 0.88     
+d. i. The null hypothesis that survival status is independent of treatment status and the alternative hypothesis that survival status is not independent of treatment status.   
+d. ii. 28, 75, 69, 34, zero, less than the observed difference in proportions
+d. iii. The difference in proportions from the simulations are almost entirely less than the observed difference in proportions. Therefore, it is unlikely that the independence model (null hypothesis) truly represents the observations of the study. These simulations show that the transplant program is effective at augmenting survival. 
+</br>
+
+
+
