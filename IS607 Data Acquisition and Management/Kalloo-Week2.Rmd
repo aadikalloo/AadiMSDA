@@ -1,0 +1,68 @@
+---
+title: "IS607 Assignment 1"
+author: "Aadi Kalloo"
+date: "January 31, 2016"
+output: html_document
+---
+
+For this assignment, the Thyroid Disease Data Set from the UCI Repository is used.      
+To clean the data, I import the data set and insert the variable names.     
+
+```{r}
+library(RCurl)
+data_url <- getURL("https://archive.ics.uci.edu/ml/machine-learning-databases/thyroid-disease/sick.data")
+data <- read.csv(text = data_url, header = FALSE)
+names(data) <- c("age","sex","taking_thyroxine","query_thyroxine","antithyroid_med","sick","pregnant","thyroid_surgery","I131","query_hypothyroid","query_hyperthyroid","lithium","goitre","tumor","hypopituitary","psych","TSH_measured","TSH","T3_measured","T3","TT4_measured","TT4","T4U_measured","T4U","FTI_measured","FTI","TBG_measured","TBG","referral_source","status")
+
+```
+     
+Variables with only 1 level should be removed: TBG and TBG_measured. Since all participants have the same value, these variables are unlikely to be useful.
+```{r}
+head(data)
+str(data)
+```
+
+```{r,}
+data$TBG <- NULL
+data$TBG_measured <- NULL
+```
+
+The *status* column needs to be cleaned up. It is converted into two columns, one with disease status and the other containing the class:
+
+```{r}
+data$status <- strsplit(as.character(data$status), "\\.\\|")
+data$classes <- lapply(data$status,"[",2)
+data$status <- lapply(data$status,"[",1)
+data$status <- as.factor(as.character(data$status))
+data$classes <- as.numeric(as.character(data$classes))
+```
+
+I am interested in seeing data for males under 40 years of age who are negative for thyroid disease. Furthermore, I am only interested in variables that contain numerical data as these would be useful for calculations. This first involves finding the variables that contain numeric data and re-integrating back into the factor dataframe:
+
+```{r}
+data_chr <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
+num_data <- suppressWarnings(data.frame(sapply(data_chr[,grepl("^\\d", data_chr[1,])],as.numeric)))
+data[names(num_data)] <- num_data
+data_subsetted <- data[, sapply(data, is.numeric)]
+data_subsetted$gender <- data$sex
+remove(data_chr)
+remove(num_data)
+```
+
+View the cleaned *data* dataframe: 
+```{r}
+str(data)
+head(data)
+```
+
+
+View the subsetted data:
+
+```{r}
+str(data_subsetted)
+head(data_subsetted)
+summary(data_subsetted)
+```
+
+
+
