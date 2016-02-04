@@ -1,0 +1,70 @@
+---
+title: "IS606 Lab 1"
+author: "Aadi Kalloo"
+date: "Due February 7, 2016"
+output: pdf_document
+---
+
+**Question 1:**
+```{r}
+source("http://www.openintro.org/stat/data/cdc.R")
+plot(x = cdc$weight, y = cdc$wtdesire, type = "p", xlab = "Weight", ylab = "Desired Weight") 
+title("Weight vs. Desired Weight")
+```
+      
+It can be seen that as weight increases, desired weight also increases. 
+
+**Question 2:**
+```{r}
+cdc$wdiff <- cdc$wtdesire - cdc$weight 
+
+```
+
+                
+**Question 3:**
+```{r}
+str(cdc$wdiff)
+summary(cdc$wdiff)
+
+```
+
+
+The *wdiff* variable contains numeric (integer) data that is continuous. It has contains a minimum of -300 and a maximum of 500. If a value is negative, it means that a participant's weight is greater than their desired weight and, therefore, they want to lose weight. Conversely, if *wdiff* contains a positive value, it means the participant wants to gain weight. 
+
+
+
+**Question 4:**
+```{r}
+hist(cdc$wdiff, breaks=100, xlab = "Desired Weight - Weight")
+boxplot(cdc$wdiff, ylab = "Desired Weight - Weight")
+title("Boxplot Distribution of wdiff")
+summary(cdc$wdiff)
+IQR(cdc$wdiff)
+```
+
+      
+This distribution is negatively skewed with a center at -10.0. It's interquartile range is 21, with the 3rd quartile at 0.0 and 1st quartile at -21. A significant number of values lie below the 3rd quartile, resulting in its skewed character. We can see from this information that most people want to lose weight. 
+
+**Question 5:**
+```{r}
+boxplot(cdc$wdiff ~ cdc$gender)
+title("Gender-stratified views on weight loss")
+summary(cdc$wdiff[cdc$gender=="m"])
+summary(cdc$wdiff[cdc$gender=="f"])
+IQR(cdc$wdiff[cdc$gender=="m"])
+IQR(cdc$wdiff[cdc$gender=="f"])
+```
+      
+It seems as though men do tend to view their weight differently than women. The male distribution is centered around -5.0 while the female distribution is centered around -10.0. This indicates that the typical female desires to lose more weight than the typical male. Females also have a greater spread than males, which could indicate varying perceptions amongst females regarding weight loss. Furthermore, males have a greater number who want to gain weight when compared to females. This can most immediately be attributed to muscle-centered weight gain, which is quite common among males. 
+
+**Question 6:**
+```{r}
+mean(cdc$weight)
+sd(cdc$weight)
+cdc$wtZscore <- (cdc$weight - mean(cdc$weight)) / (sd(cdc$weight))
+wtproportion <- length(cdc$wtZscore[cdc$wtZscore <= 1]) / length(cdc$weight)
+text <- "The proportion of weights within 1 standard deviation of the mean is "
+print(paste0(text, wtproportion))
+```
+
+
