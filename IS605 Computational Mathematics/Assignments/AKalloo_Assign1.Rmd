@@ -1,0 +1,124 @@
+---
+title: "IS605 Assignment 1"
+author: "Aadi Kalloo"
+date: "Due February 7, 2016"
+output: html_document
+---
+### Problem Set 1
+
+**Question 1:**
+```{r}
+u <- c(0.5, 0.5) #or rep(0.5, 2)
+v <- c(3, -4)
+uvdot = u %*% v
+print(paste0("The dot product is: ", uvdot))
+```
+
+**Question 2:**
+```{r}
+vec_len <- function(vec_in) {sqrt(sum((vec_in^2))) }
+u_len = vec_len(u)
+v_len = vec_len(v)
+print(paste0("The magnitude of u: ", sprintf("%.3f", u_len)))
+print(paste0("The magnitude of v: ", sprintf("%.3f", v_len)))
+```
+
+**Question 3:**
+```{r}
+3*u - 2*v
+```
+
+**Question 4:**
+```{r}
+cosA = uvdot/(u_len*v_len)  #cos of Angle
+A = acos(cosA)
+print(paste0("The angle between u and v is ", sprintf("%.3f", A), " radians"))
+```
+
+       
+### Problem Set 2
+      
+First define the matricies:   
+```{r}
+coef_mat = matrix(c(1,2,-1,1,-1,-2,3,5,4), nrow=3)
+constraint_mat = matrix(c(1,2,6), nrow=3)
+
+A = coef_mat
+b_vec = constraint_mat
+```
+
+Now two functions are created: *createTriangular* returns the upper triangular matrix;  *backSubstitution* uses the upper triangular and the transformed b vector to return the solutions to the 3x3 matrix. *solveMatrix* puts everything together into one neat function:
+
+```{r}
+createTriangular <- function(A_matrix, bvec) {  
+  nrows = length(A_matrix[, 1])
+  ncols = length(A_matrix[1, ])
+  
+  for (a in 2:nrows) {
+    multiplier = 0
+
+    for (b in 1:(a-1)) {
+        rows_back = 1
+
+        pivot = A_matrix[a, b]
+        val2 = A_matrix[a-rows_back, b]
+        if (val2 == 0) {rows_back = 2; val2 = A_matrix[a-rows_back, b] }
+        multiplier = pivot/val2
+        A_matrix[a,] = A_matrix[a,] - A_matrix[a-rows_back,]*multiplier
+        bvec[a,] = bvec[a,] - bvec[a-rows_back,]*multiplier
+    }
+  }
+
+  return(list(A_matrix, bvec))
+}
+
+backSubstitution <- function(mat1, b) {
+  solutions = c(0,0,0)
+  for (num in length(b):1) {
+    solutions[num] = (b[num] - mat1[num, 3]*solutions[3] - mat1[num, 2]*solutions[2])/mat1[num, num]
+  }
+  solutions = matrix(solutions, nrow=length(b))
+  return(solutions)
+}
+
+solveMatrix <- function(A_matrix, bvec) {
+  
+  U_matrix_list = createTriangular(A_matrix, b_vec)
+  U_matrix = U_matrix_list[1][[1]]
+  #print(U_matrix)     #Print the Upper Triangular form matrix
+  b_transformed = U_matrix_list[2][[1]]
+  #print(b_transformed)     #Print the transformed b vector matrix
+  solutions = backSubstitution(U_matrix, b_transformed)
+  
+  return(solutions)
+}
+```
+
+Call the functions to see solutions to x vector: 
+```{r}
+xsolutions = solveMatrix(A, b_vec)
+print(xsolutions)
+```
+
+Check with native solver: 
+```{r}
+solve(A, b_vec)
+```
+
+Test code versatility with another 3x3 matrix. This one starts with a *zero* pivot in the second row:
+```{r}
+coef_mat = matrix(c(3,0,4,1,1,2,4,2,1), nrow=3)
+constraint_mat = matrix(c(3,1,4), nrow=3)
+
+A = coef_mat
+b_vec = constraint_mat
+print(A)
+print(b_vec)
+
+xsolutions = solveMatrix(A, b_vec)
+print(xsolutions)
+
+solve(A, b_vec)
+```
+
+
