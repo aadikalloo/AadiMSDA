@@ -1,0 +1,91 @@
+---
+title: "IS607 Assignment 2"
+author: "Aadi Kalloo"
+date: "February 8, 2016"
+output: html_document
+---
+
+
+
+```{r}
+library(RCurl)
+
+pop_data_url <- getURL("https://raw.githubusercontent.com/aadikalloo/AadiMSDA/master/IS607%20Data%20Acquisition%20and%20Management/Assignment2_population.csv")
+tb_data_url <- getURL("https://raw.githubusercontent.com/aadikalloo/AadiMSDA/master/IS607%20Data%20Acquisition%20and%20Management/tb_db.csv")
+
+pop_data <- read.csv(text = pop_data_url, header = TRUE)
+tb_data <- read.csv(text = tb_data_url, header = FALSE)
+names(tb_data) <- c("country","year","sex","child","adult","elderly")
+
+```
+
+Let's take a look at the *pop_data* data frame: 
+
+```{r}
+head(pop_data)
+summary(pop_data)
+str(pop_data)
+```
+
+Let's take a look at the *tb_data* data frame: 
+
+```{r}
+head(tb_data)
+summary(tb_data)
+str(tb_data)
+```
+
+The goal is to create a data frame with the following 3 columns: Country, Year, Rate.
+
+Re-code missing data:
+```{r}
+tb_data[tb_data == -1] = NA
+```
+
+
+Will need to combine age data into gender-stratified totals. Then combine gender data to get annual totals. 
+
+First age data:
+```{r}
+  tb_data$agemerged = (tb_data$child + tb_data$adult + tb_data$elderly)
+```
+
+Now gender data:
+
+```{r}
+for (counter in seq(2, 3800, 2)) {
+  tb_data$gender_merged[counter] =  sum(c(tb_data$agemerged[counter-1], tb_data$agemerged[counter]), 
+                                        na.rm = TRUE)
+}
+```
+
+Data now organized into a cleaner data frame of country, year, and total cases: 
+
+```{r}
+tb = data.frame( tb_data$country      [!is.na(tb_data$gender_merged)], 
+                 tb_data$year         [!is.na(tb_data$gender_merged)], 
+                 tb_data$gender_merged[!is.na(tb_data$gender_merged)] )
+
+names(tb) <- c("Country", "Year", "Total Cases")
+```
+
+It is now very easy to create a data frame containing Country, Year, and Rate. 
+Rate is expressed per hundred thousand:
+
+```{r}
+final_data = tb
+names(final_data) = c("Country", "Year", "Rate")
+final_data[final_data == 0] = NA
+final_data <- final_data[order(final_data$Year),]
+final_data$Rate = (final_data$Rate / pop_data$population) * 10^5
+final_data$Rate = round(final_data$Rate, digits = 3)
+```
+
+Preview the *final_data* data frame:
+
+```{r}
+head(final_data)
+str(final_data)
+summary(final_data)
+```
+
