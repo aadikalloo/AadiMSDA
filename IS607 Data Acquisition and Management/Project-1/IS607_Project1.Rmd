@@ -1,0 +1,100 @@
+---
+title: "IS607 Project 1"
+author: "Aadi Kalloo"
+date: "Due February 28, 2016"
+output: html_document
+---
+
+Load data from Github, place into _chessinfo_, and initialize _chessdata_ dataframe:
+
+```{r}
+library(stringr)
+chessinfo = suppressWarnings(readLines("https://raw.githubusercontent.com/aadikalloo/AadiMSDA/master/IS607%20Data%20Acquisition%20and%20Management/Project-1/tournamentinfo.txt"))
+chessdata = as.data.frame(1)
+```
+
+
+Extract names from _chessinfo_ and store in _chessdata_ dataframe. Also remove extra spacing from names:
+
+```{r}
+row = 0
+count = 0
+
+for (count in seq(5, 196, 3)) {
+  row = row + 1
+  temp_loc = regexpr("[A-Z].+?\\|", chessinfo[count])
+  chessdata[row, 1] = as.character(substr(chessinfo[count], temp_loc, attr(temp_loc, "match.length")))
+  
+}
+
+count = 0
+for (count in 1:length(chessdata[, 1])) {
+  temp_loc = gregexpr("[A-Z] ", chessdata[count, 1])
+  chessdata[count, 1] = substr(chessdata[count, 1], 1, temp_loc[[1]][length(temp_loc[[1]])])
+}
+```
+
+
+
+Extract player state, total points, and player's pre-tournament rating:
+
+```{r}
+row = 0
+count = 0
+for (count in seq(6, 196, 3)) {
+  row = row + 1
+  temp_loc = regexpr(" [A-Z].+?\\|", chessinfo[count])
+  chessdata[row, 2] = as.character(substr(chessinfo[count], temp_loc, attr(temp_loc, "match.length")))
+}
+
+row = 0
+count = 0
+for (count in seq(5, 196, 3)) {
+  row = row + 1
+  chessdata[row, 3] = as.numeric(str_extract(chessinfo[count], "[[:digit:]]\\.[[:digit:]]+"))
+}
+
+row = 0
+count = 0
+for (count in seq(6, 196, 3)) {
+  row = row + 1
+  temp_loc = 
+  chessdata[row, 4] = as.integer(str_extract_all(chessinfo[count], "(\\d)+")[[1]][2])
+}
+
+
+```
+
+Get list of opponents, find each opponent's pre-tournament rating, and create average score of opponents' pre-tournament ratings. Not all players face the same number of opponents and this is accounted for by removing NA's:
+
+```{r}
+row = 0
+count = 0
+for (count in seq(5, 196, 3)) {
+  row = row + 1
+  opponents = as.numeric(str_extract_all(chessinfo[count], "(\\d)+")[[1]])[4:10]
+  opponents = opponents[!is.na(opponents)]
+  
+  sum = 0
+  for (opnum in opponents) {
+    sum = sum + chessdata[opnum, 4]
+  }  
+  chessdata[row, 5] = as.integer(sum/length(opponents))
+}
+```
+
+Create column names:
+
+```{r}
+names(chessdata) = c("Player_name", "Player_state", "Total_points", "Pre_rating", "Avg_Opponent_pre_rating")
+```
+
+Now to take a look at the data:
+
+```{r}
+str(chessdata)
+head(chessdata)
+summary(chessdata)
+
+```
+
