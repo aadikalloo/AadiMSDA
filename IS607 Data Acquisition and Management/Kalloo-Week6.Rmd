@@ -1,0 +1,45 @@
+---
+title: "Assignment - Week 6"
+author: "Aadi Kalloo"
+date: "Due March 6, 2016"
+output: html_document
+---
+
+
+
+```{r}
+options(warn = -1)
+library(RCurl)
+library(tidyr)
+library(dplyr)
+library(htmlTable)
+library(knitr)
+data_url <- getURL("https://raw.githubusercontent.com/aadikalloo/AadiMSDA/master/IS607%20Data%20Acquisition%20and%20Management/Kalloo-Week6.csv")
+
+data <- read.csv(text = data_url, header = TRUE)
+
+
+data$X[2] = "Alaska"
+data$X[5] = "AM WEST"
+data = data[-3,]
+names(data)[1:2] = c("Airline", "Status")
+
+
+data2 = gather(data, "city", "n", 3:7)
+data3 = spread(data2, Status, n)
+
+data3 = data3 %>% mutate(percent_delayed = 100*delayed/(`on time` + delayed))
+data3 %>% kable()
+
+
+data3 %>% group_by(city) %>% summarise(total_delayed   = sum(delayed),
+                                       total_on_time   = sum(`on time`),
+                                       percent_delayed = 100*total_delayed/(total_delayed+total_on_time)) %>% kable()
+
+data3 %>% group_by(Airline) %>% summarise(total_delayed   = sum(delayed),
+                                          total_on_time   = sum(`on time`),
+                                          percent_delayed = 100*total_delayed/(total_delayed+total_on_time)) %>% kable()
+
+```
+        
+It can be seen that San Francisco and Seattle have the greatest percentage of delayed flights, with Alaska Airlines being generally more delayed than AM WEST.
