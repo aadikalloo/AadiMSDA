@@ -1,0 +1,132 @@
+---
+title: "IS607 Project 2"
+author: "Aadi Kalloo"
+date: "Due March 13, 2016"
+output: html_document
+---
+
+For this project the datasets chosen include 1) country population data, 2) causes of death in New York City, and 3) caloric intake. All datasets are hosted in GitHub and can be links can be found in this document:
+
+
+```{r, echo = FALSE}
+library(plotly)
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(RCurl)
+```
+
+The first dataset involves analyzing population data from various countries for the years 1960 to 2014. Canada, Russia, and Japan are chosen here: 
+```{r}
+data_url <- getURL("https://raw.githubusercontent.com/aadikalloo/AadiMSDA/master/IS607%20Data%20Acquisition%20and%20Management/Project2/cpop.csv")
+data1 <- read.csv(text = data_url, header = TRUE)
+
+
+data11 = data1 %>% gather("Year", "Population", 5:59)
+data12 = data11 %>% arrange(Country.Name) %>% filter(Country.Name == "Canada" | Country.Name == "Russian Federation" | Country.Name == "Japan")
+data12 = data12[,-c(2:4)]
+data12$Year = sub("X", "", data12$Year)
+data12$Year = as.numeric(data12$Year)
+```
+
+Below is a plot of the population year-by-year. This plot is interactive in the HTML version:
+```{r}
+plot_ly(data = data12, x = Year, y = Population, mode = "markers", color = Country.Name)
+
+```
+
+Quantitative measures of population change are calculated here:
+```{r}
+popinfo = data.frame(4,4,4)
+a = 1
+for (i in unique(data12$Country.Name)){
+  PopMax = filter(data12, Country.Name == i & Year == max(Year)) %>% select(Population)
+  PopMin = filter(data12, Country.Name == i & Year == min(Year)) %>% select(Population)
+  Diff = PopMax - PopMin
+  Pincrease = PopMax/PopMin
+  popinfo[a,] = c(i, Diff, Pincrease)
+  a = a + 1
+}
+names(popinfo) = c("Country","Difference in population (2014-1960)", "% Increase in Population")
+
+```
+
+Below is a table of the above data: 
+```{r}
+kable(popinfo)
+```
+
+
+The second dataset involves analyzing causes of death in New York City:
+```{r}
+data_url <- getURL("https://raw.githubusercontent.com/aadikalloo/AadiMSDA/master/IS607%20Data%20Acquisition%20and%20Management/Project2/New_York_City_Leading_Causes_of_Death.csv")
+data2 <- read.csv(text = data_url, header = TRUE)
+```
+
+The leading causes of death each year for men and women:
+```{r}
+data2 %>% group_by(Year, Sex, Cause.of.Death) %>% summarise(Total = sum(Count)) %>% arrange(desc(Total))  %>% group_by(Year, Sex) %>% filter(Total == max(Total)) %>% kable()
+```
+
+The leading causes of death each year for each ethnic group:
+```{r}
+data2 %>% group_by(Year, Ethnicity, Cause.of.Death) %>% summarise(Total = sum(Count)) %>% arrange(desc(Total)) %>% group_by(Year, Ethnicity) %>% filter(Total == max(Total)) %>% kable()
+```
+
+The cause of death that has declined the most and that has increased the most over the years:
+
+```{r}
+data22 = data2 %>% group_by(Year, Cause.of.Death) %>% summarise(Total = sum(Count)) %>% spread(Cause.of.Death, Total)
+data22 = data22[5, ] - data22[1, ]
+data22[order(data22, decreasing = T)[1]]
+data22[order(data22, decreasing = F)[1]]
+```
+
+Cause of death has remained stable over the years. This was done by calculating the year-to-year differences and finding the mean, rather than simply using the first and last years: 
+```{r}
+data22 = data2 %>% group_by(Year, Cause.of.Death) %>% summarise(Total = sum(Count)) %>% spread(Cause.of.Death, Total)
+data23 = data22
+for (count in 1:4) {
+  data23[count,] = data22[count+1,] - data22[count,]
+}
+data23 = data23[-5,]
+data23 = as.data.frame(lapply(data23, mean))
+data23[which(data23 %in% 0)] %>% kable()
+```
+
+It can be seen that congenital deformations and short gestation / low birth weight have stayed stable over the years.
+
+The third dataset involves analyzing causes of death in New York City. Below includes the comparison by gender for the difference in calories for those who eat out against those who did not:
+```{r}
+data_url <- getURL("https://raw.githubusercontent.com/aadikalloo/AadiMSDA/master/IS607%20Data%20Acquisition%20and%20Management/Project2/calories_and_restaurants.csv")
+data3 <- read.csv(text = data_url, header = TRUE)
+
+data3[2:6,1] = "Male"
+data3[8:12,1] = "Female"
+data32 = gather(data3, "Variable", "Value", 3:11)
+data33 = data32[data32$Variable == c("Total.intake.kcal.for.restaurant.consumers", "Total.intake.kcal.for.non.consumers"),] %>% group_by(Gender, Variable) %>% summarise(Total = sum(Value))
+data33$Total = as.numeric(data33$Total)
+
+```
+
+Females: 
+```{r}
+data33[2,3] - data33[1,3]
+```
+
+Males:
+```{r}
+data33[4,3] - data33[3,3]
+```
+
+
+Below includes the comparison by gender and age group the percentage of calories from restaurants for those who did eat out:
+```{r}
+data33 = data32[data32$Variable == c("Percentage.from.restaurant.for.restaurant.consumers"),] %>% group_by(Gender, Variable) %>% summarise(Total = mean(Value))
+kable(data33)
+data33 = data32[data32$Variable == c("Percentage.from.restaurant.for.restaurant.consumers"),] %>% group_by(Age, Variable) %>% summarise(Total = mean(Value))
+kable(data33)
+
+```
+
+
