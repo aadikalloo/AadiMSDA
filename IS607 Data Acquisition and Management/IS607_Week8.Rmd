@@ -1,0 +1,86 @@
+---
+title: "IS607 Week 8"
+author: "Aadi Kalloo"
+date: "Due March 20, 2016"
+output: html_document
+---
+
+This assignment focuses on parsing information from html, xml, and json files. To do so, the RCurl, jsonlite, and htmltable (not to be confused with htmlTable) packages are used:
+
+
+```{r}
+options(warn = -1)
+#install.packages("htmltab")
+library(htmltab)
+library(RCurl)
+library(jsonlite)
+library(XML)
+library(knitr)
+```
+
+A small function to deal with multiple authors:
+
+```{r}
+reorganizeTable <- function(table1) {
+for (i in 1:length(strsplit(table1$Authors, ","))) {
+  authors = strsplit(table1$Authors, ",")
+  if(length(authors[[i]]) > 1) {
+    if (i < length(table1[ ,1])) { table1[i + 1:length(table1[ ,1]) + 1, ] = table1[i + 1:length(table1[ ,1]), ] }
+    table1[i + 1, ] = table1[i, ]
+    rownames(table1) = NULL
+    for (j in 1:length(authors[[i]])) {
+      table1$Authors[i+j-1] = authors[[i]][j]
+      }
+    }
+}
+  table1 = table1[-length(table1[ ,1]), ]
+  return(table1)
+}
+```
+
+
+A small dataset using cosmology texts was created for this assigment. The HTML table data is extracted here: 
+```{r}
+url = "https://raw.githubusercontent.com/aadikalloo/AadiMSDA/master/IS607%20Data%20Acquisition%20and%20Management/Books.html"
+tableA = htmltab(doc = url)
+tableA = data.frame(tableA, row.names = NULL)
+tableA_2 = reorganizeTable(tableA)
+```
+
+Here we have the original table:
+```{r}
+kable(tableA)
+```
+
+Here the entry with multiple authors has been separated into different records:
+```{r}
+kable(tableA_2)
+```
+
+
+XML data is extracted here:
+```{r}
+url = "https://raw.githubusercontent.com/aadikalloo/AadiMSDA/master/IS607%20Data%20Acquisition%20and%20Management/Books.xml"
+data = getURL(url, ssl.verifypeer=0L, followlocation=1L)
+doc = xmlParse(data)
+table3 = xmlToList(doc)
+tableB = as.data.frame(matrix(unlist(table3), nrow = 3, ncol = 4, byrow=TRUE))
+names(tableB) = names(tableA)
+```
+
+JSON data is extracted here:
+```{r}
+url = "https://raw.githubusercontent.com/aadikalloo/AadiMSDA/master/IS607%20Data%20Acquisition%20and%20Management/Books_json1.json"
+my.JSON <- fromJSON(url)
+tableC = as.data.frame(matrix(unlist(my.JSON), nrow = 3, ncol = 4, byrow=FALSE))
+names(tableC) = names(tableA)
+```
+
+A comparison of the "untreated" HTML, XML, and JSON tables, respectively:
+```{r}
+kable(tableA)
+kable(tableB)
+kable(tableC)
+```
+
+It can be seen that all three dataframes are the same. 
