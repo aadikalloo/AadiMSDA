@@ -1,0 +1,124 @@
+---
+title: "Kalloo -- Week10"
+author: "Aadi Kalloo"
+date: "Due April 3, 2016"
+output: html_document
+---
+
+###Load Packages
+```{r}
+library(RCurl)
+library(jsonlite)
+library(knitr)
+
+numResultsWanted = 400 #Must be multiple of 20
+```
+
+
+###Collect Data
+```{r}
+offset = 0 #results offset
+
+nytMEDF    = data.frame(matrix(ncol = 13, nrow = 20)) #initialize dataframes
+tempMEDF   = data.frame(matrix(ncol = 13, nrow = 20))
+
+pages = numResultsWanted/20
+
+for (count in 1:pages) {
+  url = paste0("http://api.nytimes.com/svc/mostpopular/v2/mostemailed/all-sections/30.json?offset=",offset,"&api-key=c51348d7befb68aa2e054a7ae0b64471%3A0%3A74845397")
+  
+  rawdata  = getURL(url)
+  nytraw   = jsonlite::fromJSON(rawdata)
+  tempMEDF[, 1:13] = nytraw[[4]][1:13]
+
+  if (count >= 2) {
+    nytMEDF = rbind(nytMEDF, tempMEDF)
+  } else {
+    nytMEDF = tempMEDF
+  }
+  
+  offset = offset + 20
+}
+names(nytMEDF)  = names(nytraw[[4]])[1:13]
+
+```
+
+
+```{r}
+offset = 0 #results offset
+
+nytMWDF    = data.frame(matrix(ncol = 13, nrow = 20)) #initialize dataframes
+tempMWDF   = data.frame(matrix(ncol = 13, nrow = 20))
+
+pages = numResultsWanted/20
+
+for (count in 1:pages) {
+  url = paste0("http://api.nytimes.com/svc/mostpopular/v2/mostshared/all-sections/30.json?offset=",offset,"&api-key=c51348d7befb68aa2e054a7ae0b64471%3A0%3A74845397")
+  
+  rawdata  = getURL(url)
+  nytraw   = jsonlite::fromJSON(rawdata)
+  tempMWDF[, 1:13] = nytraw[[4]][1:13]
+
+  if (count >= 2) {
+    nytMWDF = rbind(nytMWDF, tempMWDF)
+  } else {
+    nytMWDF = tempMWDF
+  }
+  
+  offset = offset + 20
+}
+names(nytMWDF)  = names(nytraw[[4]])[1:13]
+```
+
+
+```{r}
+offset = 0 #results offset
+
+nytMVDF    = data.frame(matrix(ncol = 13, nrow = 20)) #initialize dataframes
+tempMVDF   = data.frame(matrix(ncol = 13, nrow = 20))
+
+pages = numResultsWanted/20
+
+for (count in 1:pages) {
+  url = paste0("http://api.nytimes.com/svc/mostpopular/v2/mostviewed/all-sections/30.json?offset=",offset,"&api-key=c51348d7befb68aa2e054a7ae0b64471%3A0%3A74845397")
+  
+  rawdata  = getURL(url)
+  nytraw   = jsonlite::fromJSON(rawdata)
+  tempMVDF[, 1:13] = nytraw[[4]][1:13]
+
+  if (count >= 2) {
+    nytMVDF = rbind(nytMVDF, tempMVDF)
+  } else {
+    nytMVDF = tempMVDF
+  }
+  
+  offset = offset + 20
+}
+names(nytMVDF)  = names(nytraw[[4]])[1:13]
+```
+
+Size of dataframes:
+```{r}
+dim(nytMWDF)
+dim(nytMEDF)
+dim(nytMVDF)
+```
+
+
+###View Results
+
+Most Shared Dataframe:
+```{r}
+kable(nytMWDF[1:6,])
+```
+
+Most Emailed Dataframe:
+```{r}
+kable(nytMEDF[1:6,])
+```
+
+Most Viewed Dataframe:
+```{r}
+kable(nytMVDF[1:6,])
+```
+
