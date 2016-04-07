@@ -1,0 +1,177 @@
+---
+title: "Week 11 Assignment"
+author: "Aadi Kalloo"
+date: "Due April 10, 2016"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+##Text Mining & Spam Classification
+
+In this assignment, I use naive Bayes methods to classify email messages as spam or ham.
+
+First load all required packages:
+```{r, warning=FALSE, message = FALSE}
+#install.packages("tm")
+#install.packages("e1071")
+#install.packages("klaR")
+#install.packages("MASS")
+#install.packages("caret")
+#install.packages("pander")
+#install.packages("doMC")
+#install.packages("dplyr")
+#install.packages("doParallel")
+
+library(tm)
+library(e1071)
+library(klaR)
+library(MASS)
+library(caret)
+library(pander)
+library(dplyr)
+library(doParallel)
+library(stringr)
+registerDoParallel(cores = 8)
+panderOptions('digits', 4)
+```
+
+
+Load all labels into dataframe and messages into corpus:
+```{r}
+setwd("C:/Downloads/Week11_SpamAssignment")
+
+labels = read.csv("labels.csv", header = FALSE, stringsAsFactors = FALSE)
+names(labels) = c("file", "label")
+labels$label <- as.factor(ifelse(labels$label == "spam", "No", "Yes"))
+labels = arrange(labels, (labels$file))
+
+spamidx = which(labels$label == "Yes")
+hamidx  = which(labels$label == "No")
+
+setwd("C:/Downloads/Week11_SpamAssignment/combined")
+textcorpus = Corpus(DirSource("C:/Downloads/Week11_SpamAssignment/combined"))
+```
+
+###Text mining and cleaning methods
+
+Process text corpus using functions from the _tm_ text mining package:
+```{r}
+corpus_clean = tm_map(textcorpus,   tolower) %>% tm_map(removeNumbers) %>% tm_map(removeWords, stopwords()) %>% tm_map(removePunctuation) %>% tm_map(stripWhitespace) %>% tm_map(PlainTextDocument)
+
+```
+
+Randomly sample data and divide into training and test datasets:
+```{r}
+indexes = sample(1:nrow(labels), size = 0.2*nrow(labels))
+test = labels[indexes,]
+train = labels[-indexes,]
+spamidx2 = which(train$label == "Yes")
+hamidx2  = which(train$label == "No")
+
+
+textcorpus_clean_train = corpus_clean[-indexes]
+textcorpus_clean_test  = corpus_clean[indexes]
+
+spam = subset(textcorpus_clean_train, train$label == "No")
+ham  = subset(textcorpus_clean_train, train$label == "Yes")
+```
+
+Compare distribution of test and training data:
+```{r}
+pander(prop.table(table(train$label)))
+pander(prop.table(table(test$label)))
+```
+
+Create document term matrix of most frequently used terms:
+```{r}
+
+txt_dtm = DocumentTermMatrix(corpus_clean)
+txt_dtm_train = txt_dtm[-indexes,]
+txt_dtm_test  = txt_dtm[indexes,]
+
+txt_dict = findFreqTerms(txt_dtm_train, lowfreq = 10)
+txt_train = DocumentTermMatrix(textcorpus_clean_train, list(dictionary = txt_dict))
+txt_test  = DocumentTermMatrix(textcorpus_clean_test,  list(dictionary = txt_dict))
+```
+
+Create function to convert values from document term matrix to binary categorical format:
+```{r}
+convert_count <- function(x) {
+  y = ifelse(x > 0, 1,0)
+  y = factor(y, levels=c(0,1), labels=c("No", "Yes"))
+  return(y)
+}
+```
+
+Utilize above function on document term matrix:
+```{r}
+txt_train1 = apply(txt_train, 2, convert_count)
+txt_test1  = apply(txt_test, 2, convert_count)
+
+txt_train2 = apply(txt_train, 2, convert_count)
+txt_test2  = apply(txt_test, 2, convert_count)
+```
+
+###Prediction using Library e1071
+```{r}
+spam_model = naiveBayes(txt_train1, train$label)
+
+spam_prediction = predict(spam_model, newdata = txt_test1)
+
+pander(table(spam_prediction, test$label))
+pander(prop.table(table(spam_prediction, test$label)))
+```
+
+###Prediction using de novo methods
+
+*Here I attempt to create my own naive Bayes text classifier*
+
+Define needed variables:
+```{r}
+probspam = length(spam)/(length(spam)+length(ham))
+probham  = 1 - probspam
+k = 1 #pseudocount
+```
+
+Create dataframe of probabilities for each word given that it is either spam or ham:
+```{r}
+spamdata = data.frame(1,1,1)
+for (w in 1:length(txt_dict)){
+  word = txt_dict[w]
+  
+  plspam = (k + length(which(which(txt_train2[,word]=="Yes") %in% spamidx2)))/(2*k + length(which(txt_train2[,word]=="Yes")))
+  plham  = (k + length(which(which(txt_train2[,word]=="Yes") %in% hamidx2)))/(2*k  + length(which(txt_train2[,word]=="Yes")))
+  
+  nplspam = (k + length(which(which(txt_train2[,word]=="No") %in% spamidx2)))/(2*k + length(which(txt_train2[,word]=="No")))
+  nplham  = (k + length(which(which(txt_train2[,word]=="No") %in% hamidx2)))/(2*k  + length(which(txt_train2[,word]=="No")))
+  
+  
+  spamdata[w,1] = word
+  #P(Spam|word) = 
+  spamdata[w,2] = (plspam*probspam) / (plspam*probspam + plham*probham)
+  spamdata[w,3] = (nplspam*probspam) / (nplspam*probspam + nplham*probham)
+  
+}
+```
+
+Predict spam labels and evaluate predictions:
+```{r}
+spam_predictions = data.frame(1)
+for (doc in 1:length(txt_test2[,1])){
+  spam_predictions[doc,1] = exp(sum(log(spamdata[which(txt_test2[doc,]=="Yes"),2])))
+}
+spam_pred2 = ifelse((rank(spam_predictions))>394,1,0)
+spam_pred3 = factor(spam_pred2, levels=c(0,1), labels=c("No", "Yes"))
+pander(prop.table(table(test$label, spam_pred3)))
+```
+
+Compare my functions' performance against library e1071:
+```{r}
+pander(prop.table(table(spam_prediction, test$label)))
+pander(prop.table(table(spam_pred3, test$label)))
+
+```
+
+Library e1071 produces `r 100*prop.table(table(spam_prediction, test$label))[1] + 100*prop.table(table(spam_prediction, test$label))[4]` percent accuracy, while my methods produce `r 100*prop.table(table(spam_pred3, test$label))[1] + 100*prop.table(table(spam_pred3, test$label))[4]` percent accuracy
