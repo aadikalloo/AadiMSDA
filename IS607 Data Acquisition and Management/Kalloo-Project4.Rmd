@@ -1,0 +1,105 @@
+---
+title: "Kalloo-Project4"
+author: "Aadi Kalloo"
+date: "April 8, 2016"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+## R, SQL, and NoSQL
+
+Load needed packages:
+```{r}
+#install.packages("RMySQL")
+#install.packages("rmongodb")
+#install.packages("mongolite")
+library(RMySQL)
+library(mongolite)
+library(pander)
+```
+
+###Load Data
+
+Pull Iris dataset from UCI repository and store in 'iris' dataframe:
+```{r}
+iris = read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data", header = FALSE)
+names(iris) = c("sepal_length", "sepal_width", "petal_length", "petal_width", "class")
+pander(head(iris))
+```
+
+###SQL
+Create SQL connection
+```{r}
+mydb = dbConnect(MySQL(), user='user', password='user123', dbname='IS607', host='localhost')
+```
+
+Send iris data to SQL table:
+```{r}
+dbGetQuery(mydb, "drop table if exists iris_table")
+dbWriteTable(mydb, name='iris_table', value=iris)
+```
+
+Get iris data from SQL and store in dataframe:
+```{r}
+iris_retrieved_SQL = dbGetQuery(mydb, "select * from iris_table")
+iris_retrieved_SQL = iris_retrieved_SQL[,-1] #remove pesky "row names" column
+pander(head(iris_retrieved_SQL))
+```
+
+###MongoDB
+
+Store data in mongodb database:
+```{r}
+m = mongo(collection = "iris",  db = "iris", url = "mongodb://localhost")
+m$insert(iris_retrieved_SQL)
+```
+
+Retrieve data from mongodb:
+```{r}
+iris_retrieved_MDB = m$find('{}')
+pander(head(iris_retrieved_MDB))
+```
+
+###Time analysis
+
+
+```{r}
+dbGetQuery(mydb, "drop table if exists iris_table")
+
+start_time = Sys.time()
+for (i in 1:10){
+  mydb = dbConnect(MySQL(), user='user', password='user123', dbname='IS607', host='localhost')
+  dbWriteTable(mydb, name='iris_table', value=iris)
+  iris_retrieved_SQL = dbGetQuery(mydb, "select * from iris_table")
+  dbGetQuery(mydb, "drop table iris_table")
+  dbDisconnect(mydb)
+}
+end_time = Sys.time()
+
+time_elapsed = (end_time - start_time)/10
+```
+
+MySQL average run time: `r time_elapsed`
+
+
+```{r tidy = TRUE}
+start.time = Sys.time()
+for (i in 1:10) {
+  m = mongo(collection = "iris",  db = "iris", url = "mongodb://localhost", verbose = FALSE)
+  m$insert(iris_retrieved_SQL)
+  iris_retrieved_MDB = m$find('{}')
+  m$drop()
+  rm(m)
+}
+end.time = Sys.time()
+
+time_elapsed = (end.time - start.time)/10
+```
+
+MongoDB average run time: `r time_elapsed`
+
+
+###Comments
+Average run time was found by running 10 iterations each for roundtrip data storage and retrieval. I tried to keep the functions the same between tests (in both purpose and quantity) to allow for a fair analysis. It would seem as though MongoDB has a consistently slower run time. However, this is a small dataset and it cannot be concluded that these results would be similar for much larger datasets. One of the disadvantages of MySQL in my opinion seems to be that it is "constrained" to its own language making it slightly too rigid, and related tables can become very complex very quickly. NoSQL seems to be more dynamic and welcoming of different programming languages, however the lack of a universal language may result in issues with regards to transitioning code and databases between developers.
