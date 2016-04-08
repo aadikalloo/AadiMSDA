@@ -42,13 +42,13 @@ Load all labels into dataframe and messages into corpus:
 ```{r}
 setwd("C:/Downloads/Week11_SpamAssignment")
 
-labels = read.csv("labels.csv", header = FALSE, stringsAsFactors = FALSE)
+labels = read.csv("Labels.csv", header = FALSE, stringsAsFactors = FALSE)
 names(labels) = c("file", "label")
-labels$label <- as.factor(ifelse(labels$label == "spam", "No", "Yes"))
+labels$label <- as.factor(ifelse(labels$label == "spam", "Spam", "Ham"))
 labels = arrange(labels, (labels$file))
 
-spamidx = which(labels$label == "Yes")
-hamidx  = which(labels$label == "No")
+spamidx = which(labels$label == "Spam")
+hamidx  = which(labels$label == "Ham")
 
 setwd("C:/Downloads/Week11_SpamAssignment/combined")
 textcorpus = Corpus(DirSource("C:/Downloads/Week11_SpamAssignment/combined"))
@@ -64,18 +64,18 @@ corpus_clean = tm_map(textcorpus,   tolower) %>% tm_map(removeNumbers) %>% tm_ma
 
 Randomly sample data and divide into training and test datasets:
 ```{r}
-indexes = sample(1:nrow(labels), size = 0.2*nrow(labels))
+indexes = sample(1:nrow(labels), size = 0.15*nrow(labels))
 test = labels[indexes,]
 train = labels[-indexes,]
-spamidx2 = which(train$label == "Yes")
-hamidx2  = which(train$label == "No")
+spamidx2 = which(train$label == "Spam")
+hamidx2  = which(train$label == "Ham")
 
 
 textcorpus_clean_train = corpus_clean[-indexes]
 textcorpus_clean_test  = corpus_clean[indexes]
 
-spam = subset(textcorpus_clean_train, train$label == "No")
-ham  = subset(textcorpus_clean_train, train$label == "Yes")
+spam = subset(textcorpus_clean_train, train$label == "Spam")
+ham  = subset(textcorpus_clean_train, train$label == "Ham")
 ```
 
 Compare distribution of test and training data:
@@ -163,7 +163,7 @@ for (doc in 1:length(txt_test2[,1])){
   spam_predictions[doc,1] = exp(sum(log(spamdata[which(txt_test2[doc,]=="Yes"),2])))
 }
 spam_pred2 = ifelse((rank(spam_predictions))>394,1,0)
-spam_pred3 = factor(spam_pred2, levels=c(0,1), labels=c("No", "Yes"))
+spam_pred3 = factor(spam_pred2, levels=c(0,1), labels=c("Ham", "Spam"))
 pander(prop.table(table(test$label, spam_pred3)))
 ```
 
@@ -174,4 +174,6 @@ pander(prop.table(table(spam_pred3, test$label)))
 
 ```
 
-Library e1071 produces `r 100*prop.table(table(spam_prediction, test$label))[1] + 100*prop.table(table(spam_prediction, test$label))[4]` percent accuracy, while my methods produce `r 100*prop.table(table(spam_pred3, test$label))[1] + 100*prop.table(table(spam_pred3, test$label))[4]` percent accuracy
+**Library e1071 produces `r 100*prop.table(table(spam_prediction, test$label))[1] + 100*prop.table(table(spam_prediction, test$label))[4]` percent accuracy, while my methods produce `r 100*prop.table(table(spam_pred3, test$label))[1] + 100*prop.table(table(spam_pred3, test$label))[4]` percent accuracy. The performance of my own simple classifier is actually much better than I would have predicted before starting this project.**
+
+
