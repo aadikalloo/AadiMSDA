@@ -1,6 +1,5 @@
-,Amount in current prices ($ million),Amount in constant prices ($ million),Amount per person in current prices ($),Amount per person in constant prices ($),Percentage of GDP
-Year,"17,041","41,715","1,072","2,624",6.55
-1985_86,,,,,
+Year,Amount in current prices ($ million),Amount in constant prices ($ million),Amount per person in current prices ($),Amount per person in constant prices ($),Percentage of GDP
+1985_86,"17,041","41,715","1,072","2,624",6.55
 1986_87,"19,346","43,696","1,199","2,707",6.77
 1987_88,"21,390","45,579","1,305","2,780",6.6
 1988_89,"24,000","48,527","1,438","2,908",6.53
