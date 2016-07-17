@@ -1,0 +1,7 @@
+Model,Mean CV Error
+"Full Logistic Regression Model, Poisson",2.090639166
+Best Subsets Logistic Regression Model,1.639812807
+Logistic Ridge Regression Model,0.233054316
+Full Logistic Regression Model,1.804831208
+Neural Network,0.365446844
+Additive (Boosted) Logistic Regression Model,0.452010604
