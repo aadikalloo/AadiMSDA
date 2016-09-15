@@ -1386,3 +1386,4 @@ low,med,5more,2,big,low,unacc
 vhigh,high,2,more,big,low,unacc
 med,med,5more,2,med,high,unacc
 low,low,2,4,big,med,good
+vlow, vlow, 1, 1, vbig, vhigh
