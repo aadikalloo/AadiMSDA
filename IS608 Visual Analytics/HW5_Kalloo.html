@@ -1,0 +1,108 @@
+<head>
+    <title>Intro to JS in a Browser</title>
+</head>
+<body>
+    <h1>Assignment 5</h1>
+    <h2>Aadi Kalloo</h2>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script type="text/javascript">
+        var president_table = [];
+        var name_options = [];
+        var height_options = [];
+        var weight_options = [];
+        function reverse_it() {
+            var the_word = document.getElementById("word").value;
+            document.getElementById("word").value = the_word.split("").reverse().join("");
+        }
+        function multiply_it() {
+            var num = document.getElementById("num1").value;
+            m_counter = 0;
+            var f = "";
+            document.getElementById("target").innerHTML = "";
+            for (i = 0; i < 5; i++) {
+                f += ("<tr>");
+                for (j = 0; j < 4; j++) {
+                    m_counter = m_counter + 1;
+                    f += ("<td>" + m_counter * num + "</td>");
+                }
+                f += ("</tr>");
+            }
+            document.getElementById("target").innerHTML = f;
+        }
+        function q3() {
+            president_url = 'https://raw.githubusercontent.com/charleyferrari/CUNY_DATA608/master/lecture5/js_examples/Hello%20World/data/presidents.csv';
+            var president_table1 = [];
+            document.getElementById('q3').innerHTML = "";
+            d3.text(president_url, function(data) {
+                var parsedCSV = d3.csvParseRows(data);
+                president_table1 = parsedCSV;
+                var container = d3.select("#q3")
+                    .append("table")
+
+                    .selectAll("tr")
+                        .data(parsedCSV).enter()
+                        .append("tr")
+
+                    .selectAll("td")
+                        .data(function(data1) { return data1; }).enter()
+                        .append("td")
+                        .text(function(data1) { return data1; });
+                q4(president_table1);
+            });
+        }
+        function q4(president_table2) {
+            var forms = d3.select('#q4').append('form');
+            if(document.getElementById('selectbox') == null) {
+                forms.append('select').attr('id', 'selectbox').attr('onChange', 'get_info(name_options, height_options, weight_options)');
+
+                var select = document.getElementById("selectbox"); 
+
+                for (var i = 1; i<president_table2.length;i++) {
+                    name_options[i] = president_table2[i][0];
+                    height_options[i] = president_table2[i][1];
+                    weight_options[i] = president_table2[i][2];
+                }
+
+                for(var i = 0; i < name_options.length; i++) {
+                    var opt = name_options[i];
+                    var the_option = document.createElement("option");
+                    the_option.textContent = opt;
+                    the_option.value = opt;
+                    select.appendChild(the_option); 
+                }
+
+                forms.append('table').attr('id', 'president_info');
+            }
+        }
+        function get_info(name, height, weight) {
+            document.getElementById('president_info').innerHTML = "";
+            selectValue = d3.select('#selectbox').property('value');
+            selected_index = name.indexOf(selectValue);
+            selected_height = height[selected_index];
+            selected_weight = weight[selected_index];
+            d3.select('#president_info').append('p').text('Height: ' + selected_height).append('p').text('Weight: ' + selected_weight);
+            console.log(selectValue);
+        }
+    </script>
+    <h3>Q1</h3>
+    <p>Enter a word:</p>
+    <form>
+        <input id="word" type="string" size="10">
+        <input type="button" value="Reverse" onClick="reverse_it();">
+    </form>
+    <h3>Q2</h3>
+    <p>Enter a number:</p>
+    <form>
+        <input id="num1" type="number" size="5">
+        <input type="button" value="Enter" onClick="multiply_it();">
+    </form>
+    <table id="target"></table>
+    <h3>Q3</h3>
+    <form>
+        <input type="button" value="Read CSV From Github" onClick="q3();">
+    </form>
+    <div id='q3'></div>
+    <h3>Q4</h3>
+    <div id='q4'></div>
+</body>
+</html>
