@@ -1,0 +1,141 @@
+var jdata = '';
+var years = new Array();
+var wages = new Array();
+
+Shiny.addCustomMessageHandler("jsondata",
+  function(message){
+    var data = [];
+    var script = document.createElement('script');
+    script.src = "https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js";
+    script.type = 'text/javascript';
+    document.getElementsByTagName('head')[0].appendChild(script);
+    jdata = message;
+    state_selected = jdata[0]['state'];
+    for (i = 0; i < jdata.length; i++) {
+      wages[i] = jdata[i]['PREVAILING_WAGE'];
+      years[i] = jdata[i]['YEAR'];
+    }
+    counter=0; 
+    wages.forEach(function(d){data.push([years[counter], d]);counter++})
+    document.getElementById('state_name').innerHTML = state_selected;
+    $('#d3_graph1').remove();
+    $('#state_name').after("<div id='d3_graph1'></div>");
+
+
+  var margin = {top: 20, right: 20, bottom: 30, left: 100},
+      width = 960 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+  // setup x 
+  var xValue = function(d) { return d;}, // data -> value
+      xScale = d3.scale.linear().range([0, width]), // value -> display
+      xMap = function(d) { return xScale(xValue(d));}, // data -> display
+      xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+  // setup y
+  var yValue = function(d) { return d;}, // data -> value
+      yScale = d3.scale.linear().range([height, 0]), // value -> display
+      yMap = function(d) { return yScale(yValue(d));}, // data -> display
+      yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+  // setup fill color
+  var cValue = function(d) { return d;},
+      color = d3.scale.category10();
+
+  // add the graph canvas to the body of the webpage
+  var svg = d3.select("#d3_graph1").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  // add the tooltip area to the webpage
+  var tooltip = d3.select("#d3_graph1").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+  // don't want dots overlapping axis, so add in buffer to data domain
+  xScale.domain([d3.min(years, xValue)-1, d3.max(years, xValue)+1]);
+  yScale.domain([0, d3.max(wages, yValue)+1]); //d3.min(wages, yValue)-1
+
+  // x-axis
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("Year");
+
+  // y-axis
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Prevailing Wage");
+
+  // // draw dots
+  // svg.selectAll(".dot")
+  //     .data(data)
+  //   .enter().append("circle")
+  //     .attr("class", "dot")
+  //     .attr("r", 3.5)
+  //     .attr("cx", xMap)
+  //     .attr("cy", yMap)
+  //     .style("fill", function(d) { return color(cValue(d));}) 
+  //     .on("mouseover", function(d) {
+  //         tooltip.transition()
+  //              .duration(200)
+  //              .style("opacity", .9);
+  //         tooltip.html(d + "<br/> (" + xValue(d) 
+  //         + ", " + yValue(d) + ")")
+  //              .style("left", (d3.event.pageX + 5) + "px")
+  //              .style("top", (d3.event.pageY - 28) + "px");
+  //     })
+  //     .on("mouseout", function(d) {
+  //         tooltip.transition()
+  //              .duration(500)
+  //              .style("opacity", 0);
+  //     });
+
+  //var g = main.append("svg:g"); 
+  var points = svg.selectAll("scatter-dots")
+    .data(data)
+    .enter().append("svg:circle")
+        .attr("cx", function (d,i) { return xScale(d[0]); } )
+        .attr("cy", function (d) { return yScale(d[1]); } )
+        .attr("r", 8);
+
+  // draw legend
+  var legend = svg.selectAll(".legend")
+      .data(color.domain())
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+  // draw legend colored rectangles
+  legend.append("rect")
+      .attr("x", width - 18)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", color);
+
+  // draw legend text
+  legend.append("text")
+      .attr("x", width - 24)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text(function(d) { return d;})
+
+  svg.selectAll("scatter-dots").data(data).exit().remove()
+
+  });

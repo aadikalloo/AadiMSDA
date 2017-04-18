@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "#\n# This is the user-interface definition of a Shiny web application. You can\n# run the application by clicking 'Run App' above.\n#\n# Find out more about building applications with Shiny here:\n# \n#    http://shiny.rstudio.com/\n#\n\nlibrary(shiny)\nlibrary(plotly)\n\nshinyUI(mainPanel(\n  fluidPage(plotlyOutput(\"plot\"),\n            verbatimTextOutput(\"click\")),\n  fluidPage(column(\n    width = 12,\n    conditionalPanel(\n      condition = \"!$('html').hasClass('shiny-busy')\",\n      h3(textOutput(\"artist\")),\n      #to style to d3 output pull in css\n      tags$head(\n        tags$link(rel = \"stylesheet\", type = \"text/css\", href = \"style.css\")\n      ),\n      #load D3JS library\n      tags$script(src = \"https://d3js.org/d3.v3.min.js\"),\n      #load javascript\n      tags$script(src = \"d3script.js\"),\n      #create div referring to div in the d3script\n      tags$div(id = \"state_name\"),\n      tags$div(id = \"d3_graph1\")\n    )\n  ))\n))\n",
+    "created" : 1492529813624.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1481193922",
+    "id" : "F14A985A",
+    "lastKnownWriteTime" : 1492543485,
+    "last_content_update" : 1492543485589,
+    "path" : "~/608Final/ui.R",
+    "project_path" : "ui.R",
+    "properties" : {
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

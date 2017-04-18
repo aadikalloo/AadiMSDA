@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "library(shiny)\nlibrary(plotly)\nlibrary(jsonlite)\n\ntrim <- function (x)\n  gsub(\"^\\\\s+|\\\\s+$\", \"\", x)\n\nabb2state <- function(name,\n                      convert = F,\n                      strict = F) {\n  data(state)\n  # state data doesn't include DC\n  state = list()\n  state[['name']] = c(state.name, \"District Of Columbia\")\n  state[['abb']] = c(state.abb, \"DC\")\n  \n  if (convert)\n    state[c(1, 2)] = state[c(2, 1)]\n  \n  single.a2s <- function(s) {\n    if (strict) {\n      is.in = tolower(state[['abb']]) %in% tolower(s)\n      ifelse(any(is.in), state[['name']][is.in], NA)\n    } else{\n      # To check if input is in state full name or abb\n      is.in = rapply(state, function(x)\n        tolower(x) %in% tolower(s), how = \"list\")\n      state[['name']][is.in[[ifelse(any(is.in[['name']]), 'name', 'abb')]]]\n    }\n  }\n  sapply(name, single.a2s)\n}\n\n\n#https://gist.github.com/ligyxy/acc1410041fe2938a2f5\n\n\n# h1b = read.csv(\n#   \"/Users/aadi/Google Drive/School/MS Data Analytics/IS608 Data Visualization/Final/h1b_kaggle.csv\",\n#   stringsAsFactors = FALSE\n# )\nload(\"h1b.RData\")\n\nh1b$state = sapply(strsplit(as.character(h1b$WORKSITE), \"\\\\,\"), \"[[\", 2)\nh1b$state = trim(h1b$state)\nignore_states = c(\"NA\", \"PUERTO RICO\", \"DISTRICT OF COLUMBIA\") #these aren't on the map\n\n#h1b_recent = h1b[h1b$YEAR==\"2016\",]\nstate_wage = aggregate(PREVAILING_WAGE ~ state, data = h1b, mean)\nstate_wage = state_wage[!(state_wage$state %in% ignore_states), ]\n\n#df <- read.csv(\"https://raw.githubusercontent.com/plotly/datasets/master/2011_us_ag_exports.csv\")\nstate_wage$hover <-\n  with(state_wage, paste(state, '<br>', \"Prevailing Wage: $\", floor(PREVAILING_WAGE)))\nstate_wage$code = abb2state(state_wage$state, convert = T)\n\n# Define server logic required to draw a histogram\nshinyServer(function(input, output, session) {\n  selectedData <- reactive({\n    \n  })\n  \n  output$plot <- renderPlotly({\n    #ggplot(selectedData(),aes(x= reorder(State,-Crude.Rate), Crude.Rate))+geom_bar(stat =\"identity\", fill=\"#000099\") + labs(y=\"Crude Death Rate\", x=\"State\")\n    l <- list(color = toRGB(\"white\"), width = 4)\n    # specify some map projection/options\n    g <-\n      list(\n        scope = 'usa',\n        projection = list(type = 'albers usa'),\n        showlakes = FALSE,\n        lakecolor = toRGB('white')\n      )\n    \n    plot_geo(state_wage, locationmode = 'USA-states') %>%\n      add_trace(\n        z = ~ PREVAILING_WAGE,\n        text = ~ hover,\n        locations = ~ code,\n        color = ~ PREVAILING_WAGE,\n        colors = 'Blues'\n      ) %>%\n      colorbar(title = \"$ USD\") %>% layout(title = 'Prevailing Wage By State, 2016<br>(Hover for breakdown)', geo = g)\n  })\n  \n  output$click <- renderPrint({\n    d <- event_data(\"plotly_click\")\n    selected_state = \"Florida\"\n    if (is.null(d))\n      print(\"Click on a state to view data\")\n    else\n      #print(state_wage$state[as.numeric(d[2][1]) + 1]);\n      selected_state = state_wage$state[as.numeric(d[2][1]) + 1]\n      data_subset = h1b[h1b$state == selected_state,]\n      ds = aggregate(PREVAILING_WAGE ~ YEAR, data=data_subset, mean)\n      ds$state = selected_state\n      dataObj = jsonlite::toJSON(ds)\n      session$sendCustomMessage(type=\"jsondata\", dataObj)\n  })\n  \n})\n",
+    "created" : 1492529817920.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "427900584",
+    "id" : "EC916DE3",
+    "lastKnownWriteTime" : 1492546759,
+    "last_content_update" : 1492546759086,
+    "path" : "~/608Final/server.R",
+    "project_path" : "server.R",
+    "properties" : {
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

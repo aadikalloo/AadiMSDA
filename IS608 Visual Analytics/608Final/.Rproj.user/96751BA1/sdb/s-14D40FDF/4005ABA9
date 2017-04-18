@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "library(plotly)\ntrim <- function (x) gsub(\"^\\\\s+|\\\\s+$\", \"\", x)\n\n\n#h1b = read.csv(\"/Users/aadi/Google Drive/School/MS Data Analytics/IS608 Data Visualization/Final/h1b_kaggle.csv\", stringsAsFactors = FALSE)\n\nh1b$state = sapply(strsplit(as.character(h1b$WORKSITE), \"\\\\,\"), \"[[\", 2)\nh1b$state = trim(h1b$state)\nignore_states = c(\"NA\", \"PUERTO RICO\", \"DISTRICT OF COLUMBIA\") #these aren't on the map\n\nstate_wage = aggregate(PREVAILING_WAGE ~ state, data=h1b, mean)\nstate_wage = state_wage[!(state_wage$state %in% ignore_states),]\n\n#df <- read.csv(\"https://raw.githubusercontent.com/plotly/datasets/master/2011_us_ag_exports.csv\")\nstate_wage$hover <- with(state_wage, paste(state, '<br>', \"Prevailing Wage: \", floor(PREVAILING_WAGE)))\nstate_wage$code = abb2state(state_wage$state, convert=T)\n\n# give state boundaries a white border\nl <- list(color = toRGB(\"white\"), width = 2)\n# specify some map projection/options\ng <- list(scope = 'usa', projection = list(type = 'albers usa'), showlakes = FALSE,lakecolor = toRGB('white'))\n\np <- plot_geo(state_wage, locationmode = 'USA-states') %>%\n  add_trace(z = ~PREVAILING_WAGE, text = ~hover, locations = ~code, color = ~PREVAILING_WAGE, colors = 'Blues') %>%\n  colorbar(title = \"$ USD\") %>% layout(title = 'Prevailing Wage By State<br>(Hover for breakdown)',geo = g)\np",
+    "created" : 1492529833336.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "421740745",
+    "id" : "4005ABA9",
+    "lastKnownWriteTime" : 1492472379,
+    "last_content_update" : 1492472379,
+    "path" : "~/Google Drive/School/MS Data Analytics/IS608 Data Visualization/Final/work.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
