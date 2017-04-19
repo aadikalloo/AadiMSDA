@@ -112,7 +112,23 @@ Shiny.addCustomMessageHandler("jsondata",
     .enter().append("svg:circle")
         .attr("cx", function (d,i) { return xScale(d[0]); } )
         .attr("cy", function (d) { return yScale(d[1]); } )
-        .attr("r", 8);
+        .attr("r", 8)
+        .style("fill", function(d) { return color(cValue(d));}) 
+        .on("mouseover", function(d) {
+            tooltip.transition()
+                 .duration(100)
+                 .style("opacity", .9)
+                 .text("$"+Math.floor(d[1]))
+                 .style("left", (d3.event.pageX - 34) + "px")
+                 .style("top", (yScale(d[1]) + 15) + "px");
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+                 .duration(500)
+                 .style("opacity", 0);
+        });
+
+
 
   // draw legend
   var legend = svg.selectAll(".legend")
@@ -134,7 +150,7 @@ Shiny.addCustomMessageHandler("jsondata",
       .attr("y", 9)
       .attr("dy", ".35em")
       .style("text-anchor", "end")
-      .text(function(d) { return d;})
+      .text(function(d) { return d[0];})
 
   svg.selectAll("scatter-dots").data(data).exit().remove()
 
