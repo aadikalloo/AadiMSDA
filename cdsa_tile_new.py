@@ -49,7 +49,7 @@ def main():
 			save_dir = img_path + category + '/' + df_slice['name'].iloc[url_idx] + '/'
 			if not os.path.exists(save_dir):
 				os.makedirs(save_dir)# for x in range(0, 100):
-			joblib.Parallel(n_jobs = num_proc)(joblib.delayed(process_download_tile)(url_idx, df_slice, category, save_dir, x, y) for y in range(0, 30) for x in range(0, 100))
+			joblib.Parallel(n_jobs = int(num_proc))(joblib.delayed(process_download_tile)(url_idx, df_slice, category, save_dir, x, y) for y in range(0, 30) for x in range(0, 100))
 
 if __name__ == '__main__':
 	main()
