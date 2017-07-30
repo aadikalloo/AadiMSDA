@@ -22,10 +22,10 @@ def process_download_tile(url_idx, df_slice, category, save_dir, x, y):
 		fs = os.path.getsize(img_filename)
 		if fs < 7000:
 			os.remove(img_filename)
-			print('deleted ' + img_filename + ' of size ' + str(fs))
+			#print('deleted ' + img_filename + ' of size ' + str(fs))
 	except:
 		pass
-	print(category + ': ' + str(url_idx + 1) + '/' + str(len(df_slice['url']) + 1) + ' -- ' + str(x) + ',' + str(y))
+	#print(category + ': ' + str(url_idx + 1) + '/' + str(len(df_slice['url']) + 1) + ' -- ' + str(x) + ',' + str(y))
 
 def main():
 	for category in folder_names[2: 3]:
@@ -34,7 +34,8 @@ def main():
 		if not os.path.exists(category_dir):
 			os.makedirs(category_dir)
 		df_slice = dz_pdf[dz_pdf['collection'].str.contains(category)]
-		for url_idx in range(100, len(df_slice['url'])):
+		for url_idx in range(108, len(df_slice['url'])):
+			print(category+': '+str(url_idx))
 			save_dir = img_path + category + '/' + df_slice['name'].iloc[url_idx] + '/'
 			if not os.path.exists(save_dir):
 				os.makedirs(save_dir)# for x in range(0, 100):
