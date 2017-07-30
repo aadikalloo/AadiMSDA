@@ -4,7 +4,17 @@ import os
 import urllib.request
 import re
 import joblib
-num_cores = 8
+import argparse
+
+parser = argparse.ArgumentParser(description='Description of your program')
+parser.add_argument('-s','--start', help='start', required=True)
+parser.add_argument('-e','--end', help='end', required=True)
+parser.add_argument('-n','--numproc', help='numproc', required=True)
+args = vars(parser.parse_args())
+
+start_range = args['start']
+end_range = args['end']
+num_proc = args['numproc']
 
 dz_pdf = pd.read_csv('dzpdf.csv')
 folder_names = dz_pdf['collection'].unique()
@@ -34,12 +44,12 @@ def main():
 		if not os.path.exists(category_dir):
 			os.makedirs(category_dir)
 		df_slice = dz_pdf[dz_pdf['collection'].str.contains(category)]
-		for url_idx in range(1000, 2000):
+		for url_idx in range(start_range, end_range):
 			print(category+': '+str(url_idx))
 			save_dir = img_path + category + '/' + df_slice['name'].iloc[url_idx] + '/'
 			if not os.path.exists(save_dir):
 				os.makedirs(save_dir)# for x in range(0, 100):
-			joblib.Parallel(n_jobs = 16)(joblib.delayed(process_download_tile)(url_idx, df_slice, category, save_dir, x, y) for y in range(0, 30) for x in range(0, 100))
+			joblib.Parallel(n_jobs = num_proc)(joblib.delayed(process_download_tile)(url_idx, df_slice, category, save_dir, x, y) for y in range(0, 30) for x in range(0, 100))
 
 if __name__ == '__main__':
 	main()
