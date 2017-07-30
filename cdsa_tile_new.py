@@ -12,9 +12,9 @@ parser.add_argument('-e','--end', help='end', required=True)
 parser.add_argument('-n','--numproc', help='numproc', required=True)
 args = vars(parser.parse_args())
 
-start_range = args['start']
-end_range = args['end']
-num_proc = args['numproc']
+start_range = int(args['start'])
+end_range = int(args['end'])
+num_proc = int(args['numproc'])
 
 dz_pdf = pd.read_csv('dzpdf.csv')
 folder_names = dz_pdf['collection'].unique()
@@ -49,7 +49,7 @@ def main():
 			save_dir = img_path + category + '/' + df_slice['name'].iloc[url_idx] + '/'
 			if not os.path.exists(save_dir):
 				os.makedirs(save_dir)# for x in range(0, 100):
-			joblib.Parallel(n_jobs = int(num_proc))(joblib.delayed(process_download_tile)(url_idx, df_slice, category, save_dir, x, y) for y in range(0, 30) for x in range(0, 100))
+			joblib.Parallel(n_jobs = num_proc)(joblib.delayed(process_download_tile)(url_idx, df_slice, category, save_dir, x, y) for y in range(0, 30) for x in range(0, 100))
 
 if __name__ == '__main__':
 	main()
