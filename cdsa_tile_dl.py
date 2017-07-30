@@ -11,7 +11,7 @@ num_cores = 8
 dz_pdf = pd.read_csv('dzpdf.csv')
 folder_names = dz_pdf['collection'].unique()
 
-img_path = 'Y:/tcga_imgs/tiles/'
+img_path = '/home/aadi_kalloo/cdsa_imgs/tiles/'
 
 def process_download_tile(url_idx, df_slice, category, save_dir, x, y):
     img_filename = save_dir + df_slice['name'].iloc[url_idx] + '_' + str(x) + '_' + str(y) + ".jpg"
@@ -21,6 +21,10 @@ def process_download_tile(url_idx, df_slice, category, save_dir, x, y):
     #print(img_url)
     try:
         urllib.request.urlretrieve(img_url, img_filename)
+	fs = os.path.getsize(img_filename)
+	if fs < 7000:
+	    os.remove(img_filename)
+	    print('deleted '+img_filename+' of size '+str(fs))
     except:
         pass
     print(category+': '+str(url_idx+1)+'/'+str(len(df_slice['url'])+1)+' -- '+str(x)+','+str(y))
@@ -33,7 +37,7 @@ def main():
 	        os.makedirs(category_dir)
 	    df_slice = dz_pdf[dz_pdf['collection'].str.contains(category)]
 	    for url_idx in range(100, len(df_slice['url'])):
-	        save_dir = 'Y:/tcga_imgs/tiles/'+category+'/'+df_slice['name'].iloc[url_idx]+'/'
+	        save_dir = img_path+category+'/'+df_slice['name'].iloc[url_idx]+'/'
 	        if not os.path.exists(save_dir):
 	            os.makedirs(save_dir)
 	#        for x in range(0, 100):
