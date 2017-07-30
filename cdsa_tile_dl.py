@@ -1,10 +1,8 @@
 from bs4 import BeautifulSoup as BS
 import pandas as pd
 import os
-from os
-import listdir
-from os.path
-import isfile, join
+from os import listdir
+from os.path import isfile, join
 import urllib.request
 import re
 import joblib
