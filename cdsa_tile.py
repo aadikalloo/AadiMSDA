@@ -34,7 +34,7 @@ def main():
 		if not os.path.exists(category_dir):
 			os.makedirs(category_dir)
 		df_slice = dz_pdf[dz_pdf['collection'].str.contains(category)]
-		for url_idx in range(108, len(df_slice['url'])):
+		for url_idx in range(1000, 2000):
 			print(category+': '+str(url_idx))
 			save_dir = img_path + category + '/' + df_slice['name'].iloc[url_idx] + '/'
 			if not os.path.exists(save_dir):
