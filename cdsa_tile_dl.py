@@ -21,10 +21,10 @@ def process_download_tile(url_idx, df_slice, category, save_dir, x, y):
     #print(img_url)
     try:
         urllib.request.urlretrieve(img_url, img_filename)
-	fs = os.path.getsize(img_filename)
-	if fs < 7000:
+        fs = os.path.getsize(img_filename)
+        if fs < 7000:
 	    os.remove(img_filename)
-	    print('deleted '+img_filename+' of size '+str(fs))
+            print('deleted '+img_filename+' of size '+str(fs))
     except:
         pass
     print(category+': '+str(url_idx+1)+'/'+str(len(df_slice['url'])+1)+' -- '+str(x)+','+str(y))
