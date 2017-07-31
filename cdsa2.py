@@ -54,7 +54,7 @@ def main():
 			
 			file_for_upload = save_dir[:-1]+'.zip'
 			os.system("zip -qr "+file_for_upload+" "+save_dir)
-			os.system("./home/aadi_kalloo/google-drive/google-drive-upload-master/upload.sh "+ file_for_upload +" brca")
+			os.system("/bin/bash /home/aadi_kalloo/google-drive/google-drive-upload-master/upload.sh "+ file_for_upload +" brca")
 			os.system("rm -r "+save_dir)
 			os.system("rm "+file_for_upload)
 
