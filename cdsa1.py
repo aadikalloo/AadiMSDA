@@ -38,7 +38,7 @@ def process_download_tile(url_idx, df_slice, category, save_dir, x, y):
 	#print(category + ': ' + str(url_idx + 1) + '/' + str(len(df_slice['url']) + 1) + ' -- ' + str(x) + ',' + str(y))
 
 def main():
-	for category in folder_names[2: 3]:
+	for category in folder_names[8: 9]:
 		category_dir = img_path + category
 		print(category)
 		if not os.path.exists(category_dir):
