@@ -8,3 +8,4 @@ for folder in folder_list[1:]:
   os.system("/bin/bash /home/aadi_kalloo/google-drive/google-drive-upload-master/upload.sh "+ file_for_upload +" brca")
   os.system("rm -r "+folder)
   os.system("rm "+file_for_upload)
+  print('completed '+str(counter)+'/'+str(len(folder_list)-1))
