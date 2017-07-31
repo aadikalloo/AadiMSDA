@@ -53,10 +53,10 @@ def main():
 			joblib.Parallel(n_jobs = num_proc)(joblib.delayed(process_download_tile)(url_idx, df_slice, category, save_dir, x, y) for y in range(0, 30) for x in range(0, 100))
 			
 			file_for_upload = save_dir[:-1]+'.zip'
-			subprocess.Popen("zip -qr "+file_for_upload+" "+save_dir)
-			subprocess.Popen("./home/aadi/google-drive/google-drive-upload-master/upload.sh "+ file_for_upload +" brca")
-			subprocess.Popen("rm -r "+save_dir)
-			subprocess.Popen("rm "+file_for_upload)
+			os.system("zip -qr "+file_for_upload+" "+save_dir)
+			os.system("./home/aadi/google-drive/google-drive-upload-master/upload.sh "+ file_for_upload +" brca")
+			os.system("rm -r "+save_dir)
+			os.system("rm "+file_for_upload)
 
 if __name__ == '__main__':
 	main()
